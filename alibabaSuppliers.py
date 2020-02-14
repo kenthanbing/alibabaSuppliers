@@ -6,6 +6,7 @@ from selenium.webdriver.common.keys import Keys
 import time
 import urllib.request
 import csv
+import re
 
 # 打开一个火狐浏览器
 driver = webdriver.Firefox()
@@ -17,50 +18,47 @@ login_url = 'https://passport.alibaba.com/icbu_login.htm'
 driver.get(login_url)
 
 # 等待5秒，防止网速较差打不开页面就进行其他操作
-time.sleep(5)
+time.sleep(2)
 
 # 输入登录账号密码
 driver.find_element_by_name('loginId').send_keys(input('Please enter your ID: '))
 driver.find_element_by_name('password').send_keys(input('Please enter your password: '))
 driver.find_element_by_name('submit-btn').send_keys(Keys.ENTER)
-time.sleep(5)
+time.sleep(2)
 
 # 跳转到搜索结果页面
-section = input('Please enter section key word: ')
-search_result_url = f'https://www.alibaba.com/trade/search?&IndexArea=company_en&SearchText={section}'
+section = input('Please enter section ID number: ')
+search_result_url = f'https://www.alibaba.com/trade/search?&indexArea=company_en&category={section}&page=1'
 driver.get(search_result_url)
-time.sleep(5)
+time.sleep(2)
 
 # 新建一个data.csv文件，并且将数据保存到csv中
-csvfile = open('data.csv', 'w')
+csvfile = open(f'{section}.csv', 'w', encoding='utf8', newline='')
 writer = csv.writer(csvfile)
 # 写入标题，采集企业名称，联系人，职位，座机，手机，传真，地址，邮编，国家，省份，城市，网址，阿里网址
-writer.writerow(('company_name', 'contact_name', 'position', 'tel', 'mobile', 'fax', 'address', 'zip', 'country', 'province', 'city', 'website', 'ali_website'))
+writer.writerow(('company_name', 'contact_name', 'position', 'tel', 'mobile', 'fax', 'address', 'zip_code', 'country', 'province', 'city', 'website', 'ali_website'))
 
 
 # 找出搜索结果页数
-last_page = driver.find_element_by_xpath("//div[@class='ui2-pagination-pages']/a[last()-1]")
+last_page = int(driver.find_element_by_xpath("//div[@class='ui2-pagination-pages']/a[last()-1]").text)
 
 # 循环翻页
 for i in range(1,last_page+1):
-    search_result_url = f'https://www.alibaba.com/trade/search?&indexArea=company_en&keyword={section}&page={i}'
+    search_result_url = f'https://www.alibaba.com/trade/search?&indexArea=company_en&category={section}&page={i}'
     driver.get(search_result_url)
-    time.sleep(5)
-    company_list = [i.get_attribute('href') for i in driver.find_elements_by_xpath('//h2[@class="title ellipsis"]/a')]
-    # print(len(company_list))
-    # print(company_list)
+    time.sleep(2)
+    company_list = [i.get_attribute('href') for i in driver.find_elements_by_link_text('Contact Details')]
     # 循环打开某页搜索结果每家公司页面
     for company in company_list:
+        # 打开contacts页
         driver.get(company)
-        time.sleep(5)
-        driver.find_element_by_link_text('Contacts').click()
-        time.sleep(5)
+        time.sleep(2)
+        # 爬取数据
         try:
             driver.find_element_by_link_text("View details").click()
-            time.sleep(5)
+            time.sleep(2)
         except:
             pass
-        # 找出数据
         try:
             company_name = driver.find_element_by_xpath('//table[@class="contact-table"]/tr/td').text
         except:
@@ -97,9 +95,9 @@ for i in range(1,last_page+1):
             address = ''
 
         try:
-            zip = driver.find_element_by_xpath("//th[text()='Zip:']/following-sibling::td").text
+            zip_code = driver.find_element_by_xpath("//th[text()='Zip:']/following-sibling::td").text
         except:
-            zip = ''
+            zip_code = ''
 
         try:
             country = driver.find_element_by_xpath("//th[text()='Country/Region:']/following-sibling::td").text
@@ -126,7 +124,7 @@ for i in range(1,last_page+1):
         except:
             ali_website = ''
 
-        data = (company_name, contact_name, position, tel, mobile, fax, address, zip, country, province, city, website, ali_website)
+        data = (company_name, contact_name, position, tel, mobile, fax, address, zip_code, country, province, city, website, ali_website)
         writer.writerow(data)
 
 # 关闭csv

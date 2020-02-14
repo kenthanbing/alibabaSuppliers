@@ -1,10 +1,8 @@
-import csv
+import re
+company = 'http://tigerpet.en.alibaba.com/company_profile.html?spm=a2700.supplier-normal.35.3.65eb1cffcwJlHP#top-nav-bar'
 
-# 新建一个data.csv文件，并且将数据保存到csv中
-csvfile = open('data.csv', 'w')
-writer = csv.writer(csvfile)
-# 写入标题，采集企业名称，联系人，职位，座机，手机，传真，地址，邮编，国家，省份，城市，网址，阿里网址
-writer.writerow(('company_name', 'contact_name', 'position', 'tel', 'mobile', 'fax', 'address', 'zip', 'country', 'province', 'city', 'website', 'ali_website'))
+pat = re.compile(r'.*?\.alibaba\.com/')
+company_domain = pat.search(company).group()
+contacts_page = company_domain + 'contactinfo.html'
 
-writer.writerow(('foo', 'bar'))
-csvfile.close()
+print(contacts_page)
