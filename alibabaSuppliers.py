@@ -52,11 +52,11 @@ for i in range(1,last_page+1):
     for company in company_list:
         # 打开contacts页
         driver.get(company)
-        time.sleep(2)
+        time.sleep(5)
         # 爬取数据
         try:
             driver.find_element_by_link_text("View details").click()
-            time.sleep(2)
+            time.sleep(5)
         except:
             pass
         try:
