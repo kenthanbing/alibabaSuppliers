@@ -1,0 +1,5 @@
+Automobiles.Trucks.Marine_Parts_%2526_Accessories.Trains.Auto_Parts_%2526_Accessories
+
+Bus_Parts_%2526_Accessories.Bus.Trailers.Golf_Carts.Truck_Parts_%2526_Accessories.Motorcycles_%2526_Scooters
+
+Emergency_Vehicles.ATVs_%2526_UTVs.Containers.Other_Vehicles.TYRE
